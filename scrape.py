@@ -34,6 +34,8 @@ try:
     cursor.execute(sql_file.read())
     conn.commit()
 
+    print("Connected and initialized database")
+
 except e:
     print("Database connection not possibe.")
     sys.exit()
@@ -133,71 +135,81 @@ def create_dj(dj_name):
 
 
 def upload_set(dj, set_name, source, songs):
-    print(dj, set_name, source, songs)
-
     dj_id = get_dj_id(dj)
     if dj_id is None:
         dj_id = create_dj(dj)
 
     set_id = get_set_id(source)
     if set_id is None:
-        set_id = create_set(source)
+        set_id = create_set(source, dj_id)
 
-    for index, song in enumerate(songs):
-        artist_id = get_artist_id(song["artist"])
-        if artist_id is None:
-            artist_id = create_artist(song["artist"])
+        for index, song in enumerate(songs):
+            artist_id = get_artist_id(song["artist"])
+            if artist_id is None:
+                artist_id = create_artist(song["artist"])
 
-        song_id = get_song_id(song["title"])
-        if song_id is None:
-            song_id = create_song(song["title"], artist_id, song["duration"])
+            song_id = get_song_id(song["title"])
+            if song_id is None:
+                # TODO: add duration
+                song_id = create_song(song["title"], artist_id, 0)
 
-        if index > 0 and index < len(songs) - 1:
-            song_from_id = get_song_id(songs[index - 1]["title"])
-            song_to_id = song_id
-            create_transition(song_from_id, song_to_id, set_id)
+            if index > 0 and index < len(songs) - 1:
+                song_from_id = get_song_id(songs[index - 1]["title"])
+                song_to_id = song_id
+                create_transition(song_from_id, song_to_id, set_id)
 
-# Url
-urls = []
-urls.append("https://www.1001tracklists.com/tracklist/2nxg6h71/martin-garrix-the-martin-garrix-show-212-2018-09-28.html")
+    else:
+        print("Already scraped set from %s" % source)
 
 
 # Create browser
 driver = webdriver.Chrome()
 driver.implicitly_wait(30)
 
-
 # Scrape tracks
-for url in urls:
-    driver.get(url)
-    soup = BeautifulSoup(driver.page_source, "html.parser")
+with open('queue.txt') as f:
+    for line in f:
+        url = line.strip()
 
-    # Scrape meta info
-    source = url
-    set_name = soup.find("meta", {"itemprop": "name"})["content"]
-    dj_name = soup.select("#pageNavi > span a")[0].text
+        if(url == ""):
+            print("Please populate the queue.txt")
+            sys.exit()
 
-    # Scrape Songs
-    songs = []
-    songs_html = soup.select("tr.tlpItem")
-    for song in songs_html:
-        artist_name = song.find("meta", {"itemprop": "byArtist"})["content"]
-        label = song.find("meta", {"itemprop": "publisher"})["content"]
-        song_name = song.find("meta", {"itemprop": "name"})["content"].split("-")[1].strip()
+        print("Scraping %s:" % url)
 
-        duration_info = song.find("meta", {"itemprop": "duration"})["content"].replace("PT", "")
-        duration_min = int(duration_info.split("M")[0])
-        duration_sec = int(duration_info.split("M")[1].replace("S", ""))
-        duration = duration_min * 60 + duration_sec
+        driver.get(url)
+        soup = BeautifulSoup(driver.page_source, "html.parser")
 
-        songs.append({
-            "artist": artist_name,
-            "title": song_name,
-            "duration": duration,
-        })
+        # Scrape meta info
+        source = url
+        set_name = soup.find("meta", {"itemprop": "name"})["content"]
+        dj_name = soup.select("#pageNavi > span a")[0].text
 
-    # Add info to database
-    upload_set(dj_name, set_name, source, songs)
+        # Scrape Songs
+        songs = []
+        songs_html = soup.select("tr.tlpItem")
+        for song in songs_html:
+            artist_name = song.find("meta", {"itemprop": "byArtist"})["content"]
+            song_name = song.find("meta", {"itemprop": "name"})["content"].split("-")[1].strip()
 
-    # Crawl on
-    time.sleep(5)
+            # label = song.find("meta", {"itemprop": "publisher"})["content"]
+
+            # duration_info = song.find("meta", {"itemprop": "duration"})["content"].replace("PT", "")
+            # duration_min = int(duration_info.split("M")[0])
+            # duration_sec = int(duration_info.split("M")[1].replace("S", ""))
+            # duration = duration_min * 60 + duration_sec
+
+            songs.append({
+                "artist": artist_name,
+                "title": song_name,
+                # "duration": duration,
+            })
+
+        # Add info to database
+        upload_set(dj_name, set_name, source, songs)
+        time.sleep(5)
+
+print("Scraped queue.txt")
+
+# Clear queue.txt
+open("queue.txt", 'w').close()
