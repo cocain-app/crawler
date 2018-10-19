@@ -1,8 +1,16 @@
+atomicwrites==1.2.1
+attrs==18.2.0
 beautifulsoup4==4.6.3
 certifi==2018.10.15
 chardet==3.0.4
 idna==2.7
+more-itertools==4.3.0
+pathlib2==2.3.2
+pluggy==0.8.0
 psycopg2-binary==2.7.5
+py==1.7.0
+pytest==3.9.1
 requests==2.19.1
 selenium==3.14.1
+six==1.11.0
 urllib3==1.23
