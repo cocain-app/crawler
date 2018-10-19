@@ -46,10 +46,10 @@ def initialize_database(conn):
     conn.commit()
 
 
-def upload_set(conn, dj, set_name, source, songs):
-    dj_id = get_dj_id(conn, dj)
+def upload_set(conn, dj_name, set_name, source, songs):
+    dj_id = get_dj_id(conn, dj_name)
     if dj_id is None:
-        dj_id = create_dj(conn, dj)
+        dj_id = create_dj(conn, dj_name)
 
     set_id = get_set_id(conn, source)
     if set_id is None:
@@ -66,8 +66,13 @@ def upload_set(conn, dj, set_name, source, songs):
                 song_id = create_song(conn, song["title"], artist_id, 0)
 
             if index > 0 and index < len(songs) - 1:
-                song_from_id = get_song_id(conn, songs[index-1]["title"], get_artist_id(conn, songs[index-1]["artist"]))
+                song_from_id = get_song_id(
+                    conn,
+                    songs[index-1]["title"],
+                    get_artist_id(conn, songs[index-1]["artist"])
+                )
                 song_to_id = song_id
+
                 create_transition(conn, song_from_id, song_to_id, set_id)
 
     else:
