@@ -66,8 +66,12 @@ def upload_set(conn, setlist):
 
             song_id = get_song_id(conn, song["title"], artist_id)
             if song_id is None:
-                # TODO: add duration
-                song_id = create_song(conn, song["title"], artist_id, 0)
+                song_id = create_song(
+                    conn,
+                    song["title"],
+                    artist_id,
+                    song["duration"]
+                )
 
             if index > 0 and index < len(songs) - 1:
                 song_from_id = get_song_id(
