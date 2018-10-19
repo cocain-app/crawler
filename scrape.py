@@ -42,9 +42,9 @@ except e:
 
 
 # Database Functions
-def get_song_id(song_title):
-    SQL = "SELECT id FROM Songs WHERE title=%s"
-    data = (song_title, )
+def get_song_id(song_title, artist_id):
+    SQL = "SELECT songs.id FROM Songs INNER JOIN artists ON artists.id=songs.artist_id WHERE songs.title=%s AND artists.id=%s"
+    data = (song_title, artist_id, )
     cursor.execute(SQL, data)
     records = cursor.fetchone()
     if(records is None or len(records) < 1):
@@ -148,13 +148,13 @@ def upload_set(dj, set_name, source, songs):
             if artist_id is None:
                 artist_id = create_artist(song["artist"])
 
-            song_id = get_song_id(song["title"])
+            song_id = get_song_id(song["title"], artist_id)
             if song_id is None:
                 # TODO: add duration
                 song_id = create_song(song["title"], artist_id, 0)
 
             if index > 0 and index < len(songs) - 1:
-                song_from_id = get_song_id(songs[index - 1]["title"])
+                song_from_id = get_song_id(songs[index-1]["title"], get_artist_id(songs[index-1]["artist"]))
                 song_to_id = song_id
                 create_transition(song_from_id, song_to_id, set_id)
 
@@ -183,7 +183,7 @@ with open('queue.txt') as f:
         # Scrape meta info
         source = url
         set_name = soup.find("meta", {"itemprop": "name"})["content"]
-        dj_name = soup.select("#pageNavi > span a")[0].text
+        dj_name = soup.select("#pageNavi > span")[1].text
 
         # Scrape Songs
         songs = []
@@ -211,5 +211,6 @@ with open('queue.txt') as f:
 
 print("Scraped queue.txt")
 
-# Clear queue.txt
+# Clear queue.txt & close browsers
+driver.quit()
 open("queue.txt", 'w').close()
