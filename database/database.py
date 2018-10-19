@@ -46,7 +46,11 @@ def initialize_database(conn):
     conn.commit()
 
 
-def upload_set(conn, dj_name, set_name, source, songs):
+def upload_set(conn, setlist):
+    dj_name = setlist["dj_name"]
+    source = setlist["source"]
+    songs = setlist["songs"]
+
     dj_id = get_dj_id(conn, dj_name)
     if dj_id is None:
         dj_id = create_dj(conn, dj_name)
