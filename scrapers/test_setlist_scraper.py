@@ -19,6 +19,8 @@ def test_setlist_scraper():
         'dj_name': 'San Holo',
         'source': 'http://test.com',
         'set_title': 'San Holo - bitbird Radio 023 2018-09-21',
+        'next_setlist': '/tracklist/1grl3pyt/san-holo-beaudamian-bitbird-radio-024-2018-10-05.html',
+        'previous_setlist': '/tracklist/2uj6gx0t/san-holo-rome-in-silver-bitbird-radio-022-2018-09-10.html',
         'songs': [
             {
                 'label': 'bitbird',

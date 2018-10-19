@@ -8,6 +8,21 @@ def scrape_set(html, url):
     set_title = soup.find("meta", {"itemprop": "name"})["content"]
     dj_name = soup.select("#pageNavi > span")[1].text
 
+    # Scrape links
+    try:
+        previous_setlist = soup.body.findAll(
+            text='Previous Tracklist'
+        )[0].parent.parent.find_next_sibling().select("a")[0].get('href')
+    except Exception as e:
+        next_setlist = None
+
+    try:
+        next_setlist = soup.body.findAll(
+            text='Next Tracklist'
+        )[0].parent.parent.find_next_sibling().select("a")[0].get('href')
+    except Exception as e:
+        next_setlist = None
+
     # Scrape Songs
     songs = []
     songs_html = soup.select("tr.tlpItem")
@@ -51,6 +66,8 @@ def scrape_set(html, url):
         "set_title": set_title,
         "source": url,
         "dj_name": dj_name,
-        "songs": songs
+        "songs": songs,
+        "next_setlist": next_setlist,
+        "previous_setlist": previous_setlist
     }
     return set
