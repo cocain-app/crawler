@@ -7,7 +7,7 @@ from database import create_database_connection, upload_set
 from scrapers import scrape_set
 
 
-def crawl(autocrawl=False):
+def crawl(autocrawl=False, sleeptime=5):
     # Establish Database connection
     try:
         conn = create_database_connection()
@@ -42,7 +42,7 @@ def crawl(autocrawl=False):
             urls.append(setlist["previous_set"])
             print("Added setlist %s to queue." % setlist["previous_set"])
 
-        time.sleep(5)
+        time.sleep(sleeptime)
 
     # Clear queue.txt & close browsers
     print("Scraped queue.txt")
@@ -58,13 +58,24 @@ if __name__ == "__main__":
                         help="automatically add urls to queue",
                         action="store_true")
 
+    parser.add_argument("-s", "--sleeptime", type=int)
+
     args = parser.parse_args()
 
     if(args.autocrawl):
         autocrawl = True
-        print("automatic crawling is turned on")
+        print("Automatic crawling is turned on")
     else:
         autocrawl = False
 
+    if(args.sleeptime):
+        if args.sleeptime > 5:
+            sleeptime = args.sleeptime
+            print("Sleeptime is set to %s" % sleeptime)
+        else:
+            print("Sleeptime needs to be a minimum of 5 seconds")
+    else:
+        sleeptime = 5
+
     # Crawl
-    crawl(autocrawl=autocrawl)
+    crawl(autocrawl=autocrawl, sleeptime=sleeptime)
