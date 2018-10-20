@@ -11,16 +11,16 @@ def test_setlist_scraper():
     with open(path_to_file, "r") as content_file:
         html = content_file.read()
 
-    set = scrape_set(html, "http://test.com")
+    set = scrape_set(html, "https://www.1001tracklists.com/tracklist/1ftrfqc9/san-holo-bitbird-radio-023-2018-09-21.html")
 
     print(set)
 
     assert set == {
         'dj_name': 'San Holo',
-        'source': 'http://test.com',
+        'source': 'https://www.1001tracklists.com/tracklist/1ftrfqc9/san-holo-bitbird-radio-023-2018-09-21.html',
         'set_title': 'San Holo - bitbird Radio 023 2018-09-21',
-        'next_setlist': '/tracklist/1grl3pyt/san-holo-beaudamian-bitbird-radio-024-2018-10-05.html',
-        'previous_setlist': '/tracklist/2uj6gx0t/san-holo-rome-in-silver-bitbird-radio-022-2018-09-10.html',
+        'next_set': 'https://www.1001tracklists.com/tracklist/1grl3pyt/san-holo-beaudamian-bitbird-radio-024-2018-10-05.html',
+        'previous_set': 'https://www.1001tracklists.com/tracklist/2uj6gx0t/san-holo-rome-in-silver-bitbird-radio-022-2018-09-10.html',
         'songs': [
             {
                 'label': 'bitbird',

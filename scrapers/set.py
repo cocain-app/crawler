@@ -1,5 +1,5 @@
 from bs4 import BeautifulSoup
-
+from urllib.parse import urljoin
 
 def scrape_set(html, url):
     soup = BeautifulSoup(html, "html.parser")
@@ -10,16 +10,22 @@ def scrape_set(html, url):
 
     # Scrape links
     try:
-        previous_setlist = soup.body.findAll(
-            text='Previous Tracklist'
-        )[0].parent.parent.find_next_sibling().select("a")[0].get('href')
+        previous_setlist = urljoin(
+            url,
+            soup.body.findAll(
+                text='Previous Tracklist'
+            )[0].parent.parent.find_next_sibling().select("a")[0].get('href')
+        )
     except Exception as e:
-        next_setlist = None
+        previous_setlist = None
 
     try:
-        next_setlist = soup.body.findAll(
-            text='Next Tracklist'
-        )[0].parent.parent.find_next_sibling().select("a")[0].get('href')
+        next_setlist = urljoin(
+            url,
+            soup.body.findAll(
+                text='Next Tracklist'
+            )[0].parent.parent.find_next_sibling().select("a")[0].get('href')
+        )
     except Exception as e:
         next_setlist = None
 
@@ -67,7 +73,7 @@ def scrape_set(html, url):
         "source": url,
         "dj_name": dj_name,
         "songs": songs,
-        "next_setlist": next_setlist,
-        "previous_setlist": previous_setlist
+        "next_set": next_setlist,
+        "previous_set": previous_setlist
     }
     return set
