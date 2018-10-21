@@ -22,6 +22,8 @@ def test_regular_scraping():
         'set_title': 'San Holo - bitbird Radio 023 2018-09-21',
         'next_set': 'https://www.1001tracklists.com/tracklist/1grl3pyt/san-holo-beaudamian-bitbird-radio-024-2018-10-05.html',
         'previous_set': 'https://www.1001tracklists.com/tracklist/2uj6gx0t/san-holo-rome-in-silver-bitbird-radio-022-2018-09-10.html',
+        'occasion': None,
+        'venue': None,
         'songs': [
             {
                 'label': 'bitbird',
@@ -116,6 +118,9 @@ def test_id_scraping():
         'next_set': None,
         'previous_set': None,
         'set_title': 'SWACQ @ Revealed Night, Q-Factory Amsterdam, Amsterdam Dance Event, Netherlands 2018-10-20',
+        'source': 'https://www.1001tracklists.com/tracklist/ltk7cx9/swacq-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html',
+        'occasion': 'Amsterdam Dance Event',
+        'venue': 'Q-Factory Amsterdam',
         'songs': [
             {
                 'artist': 'SWACQ',
@@ -153,6 +158,6 @@ def test_id_scraping():
                 'duration': None,
                 'label': None,
                 'title': 'Shine (Steff Da Campo Remix)'
-            }],
-        'source': 'https://www.1001tracklists.com/tracklist/ltk7cx9/swacq-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html'
+            }
+        ]
     }

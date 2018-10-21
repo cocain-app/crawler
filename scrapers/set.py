@@ -9,6 +9,22 @@ def scrape_set(html, url):
     set_title = soup.find("meta", {"itemprop": "name"})["content"]
     dj_name = soup.select("#pageNavi > span")[1].text
 
+    # Scrape occasion
+    try:
+        occasion = soup.body.findAll(
+            text=' Open Air / Festival '
+        )[0].parent.parent.find_previous_sibling().select("a")[0].text
+    except Exception as e:
+        occasion = None
+
+    # Scrape venue
+    try:
+        venue = soup.body.findAll(
+            text=' Event Location '
+        )[0].parent.parent.find_previous_sibling().select("a")[0].text
+    except Exception as e:
+        venue = None
+
     # Scrape links
     try:
         previous_setlist = urljoin(
@@ -81,6 +97,8 @@ def scrape_set(html, url):
         "dj_name": dj_name,
         "songs": songs,
         "next_set": next_setlist,
-        "previous_set": previous_setlist
+        "previous_set": previous_setlist,
+        "occasion": occasion,
+        "venue": venue
     }
     return set
