@@ -110,10 +110,11 @@ if __name__ == "__main__":
         autocrawl = False
 
     if(args.sleeptime):
-        if args.sleeptime > 5:
+        if args.sleeptime > 4:
             sleeptime = args.sleeptime
             print("Sleeptime is set to %s" % sleeptime)
         else:
+            sleeptime = 5
             print("Sleeptime needs to be a minimum of 5 seconds")
     else:
         sleeptime = 5
