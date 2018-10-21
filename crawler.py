@@ -26,7 +26,13 @@ def crawl(autocrawl=False, sleeptime=5):
             urls.append(line.strip())
 
     # Scrape tracks
-    for url in urls:
+    urls_scraped = set()
+    while(len(urls) > 0):
+        num_current = len(urls_scraped) + 1
+        num_overall = str(len(urls) + len(urls_scraped)) + ("+" if autocrawl else "")
+        print("Scraping url %s of %s" % (num_current, num_overall))
+
+        url = urls[0]
         if(url == "" or url is None):
             continue
 
@@ -49,21 +55,33 @@ def crawl(autocrawl=False, sleeptime=5):
         # Add links to queue
         if(autocrawl):
             if(setlist["previous_set"]):
-                urls.append(setlist["previous_set"])
-                print("Added previous setlist %s to queue."
-                      % setlist["previous_set"])
+                url = setlist["previous_set"]
+                if not (url in urls) and not (url in urls_scraped):
+                    urls.append(url)
+                    print("Added previous setlist %s to queue."
+                          % setlist["previous_set"])
 
             if(setlist["next_set"]):
-                urls.append(setlist["next_set"])
-                print("Added next setlist %s to queue." % setlist["next_set"])
+                url = setlist["next_set"]
+                if not (url in urls) and not (url in urls_scraped):
+                    urls.append(url)
+                    print("Added next setlist %s to queue."
+                          % setlist["next_set"])
 
             for link in setlist["artist_links"]:
-                urls.append(link)
-                print("Added artist setlist %s to queue." % link)
+                url = link
+                if not (url in urls) and not (url in urls_scraped):
+                    urls.append(url)
+                    print("Added artist setlist %s to queue." % link)
 
             for link in setlist["related_links"]:
-                urls.append(link)
-                print("Added related setlist %s to queue." % link)
+                url = link
+                if not (url in urls) and not (url in urls_scraped):
+                    urls.append(url)
+                    print("Added related setlist %s to queue." % link)
+
+        # Move url to already scraped
+        urls_scraped.add(urls.pop(0))
 
         time.sleep(sleeptime)
 
