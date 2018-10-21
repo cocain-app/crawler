@@ -60,6 +60,10 @@ def upload_set(conn, setlist):
         set_id = create_set(conn, source, dj_id)
 
         for index, song in enumerate(songs):
+
+            if(song is None):
+                continue
+
             artist_id = get_artist_id(conn, song["artist"])
             if artist_id is None:
                 artist_id = create_artist(conn, song["artist"])
@@ -74,6 +78,9 @@ def upload_set(conn, setlist):
                 )
 
             if index > 0 and index < len(songs) - 1:
+                if(songs[index-1] is None):
+                    continue
+
                 song_from_id = get_song_id(
                     conn,
                     songs[index-1]["title"],

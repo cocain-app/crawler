@@ -44,7 +44,7 @@ def crawl(autocrawl=False, sleeptime=5):
 
         html = driver.page_source
         setlist = scrape_set(html, url)
-        # upload_set(conn, setlist)
+        upload_set(conn, setlist)
 
         # Add links to queue
         if(autocrawl):
