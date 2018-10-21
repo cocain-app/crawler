@@ -1,6 +1,7 @@
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
+
 def scrape_set(html, url):
     soup = BeautifulSoup(html, "html.parser")
 
@@ -33,6 +34,12 @@ def scrape_set(html, url):
     songs = []
     songs_html = soup.select("tr.tlpItem")
     for song in songs_html:
+
+        track_full = song.select(".trackValue")[0].text
+
+        if("ID" in track_full):
+            songs.append(None)
+            continue
 
         artist_name = song.find(
             "meta", {"itemprop": "byArtist"}

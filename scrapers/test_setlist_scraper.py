@@ -3,17 +3,18 @@ import os
 from .set import scrape_set
 
 
-def test_setlist_scraper():
+def test_regular_scraping():
     path_to_current_file = os.path.realpath(__file__)
     current_directory = os.path.split(path_to_current_file)[0]
-    path_to_file = os.path.join(current_directory, "dummy_set.html")
+    path_to_file = os.path.join(
+        current_directory, "snapshots/regular_set.html")
 
     with open(path_to_file, "r") as content_file:
         html = content_file.read()
 
-    set = scrape_set(html, "https://www.1001tracklists.com/tracklist/1ftrfqc9/san-holo-bitbird-radio-023-2018-09-21.html")
-
-    print(set)
+    set = scrape_set(
+        html,
+        "https://www.1001tracklists.com/tracklist/1ftrfqc9/san-holo-bitbird-radio-023-2018-09-21.html")
 
     assert set == {
         'dj_name': 'San Holo',
@@ -95,4 +96,63 @@ def test_setlist_scraper():
                 'title': 'Vestal Avenue'
             }
         ]
+    }
+
+
+def test_id_scraping():
+    path_to_current_file = os.path.realpath(__file__)
+    current_directory = os.path.split(path_to_current_file)[0]
+    path_to_file = os.path.join(current_directory, "snapshots/id_set.html")
+
+    print(path_to_file)
+
+    with open(path_to_file, "r") as content_file:
+        html = content_file.read()
+
+    set = scrape_set(html, "https://www.1001tracklists.com/tracklist/ltk7cx9/swacq-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html")
+
+    assert set == {
+        'dj_name': 'SWACQ',
+        'next_set': None,
+        'previous_set': None,
+        'set_title': 'SWACQ @ Revealed Night, Q-Factory Amsterdam, Amsterdam Dance Event, Netherlands 2018-10-20',
+        'songs': [
+            {
+                'artist': 'SWACQ',
+                'duration': 222,
+                'label': 'Musical Freedom Records',
+                'title': 'Kayos'
+            },
+            {
+                'artist': 'Quintino',
+                'duration': 183,
+                'label': "Spinnin' Records",
+                'title': 'Inferno'
+            },
+            None,
+            {
+                'artist': 'GTA & Damien N-Drix',
+                'duration': 181,
+                'label': 'Mad Decent',
+                'title': 'Drix'},
+            {
+                'artist': 'JOYRYDE & Skrillex',
+                'duration': 199,
+                'label': 'OWSLA',
+                'title': 'Agen Wida'
+            },
+            None,
+            None,
+            {
+                'artist': 'Oomloud',
+                'duration': 245,
+                'label': 'Hysteria Records',
+                'title': 'Rumbabox'},
+            {
+                'artist': 'Sandjake',
+                'duration': None,
+                'label': None,
+                'title': 'Shine (Steff Da Campo Remix)'
+            }],
+        'source': 'https://www.1001tracklists.com/tracklist/ltk7cx9/swacq-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html'
     }
