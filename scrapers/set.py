@@ -25,7 +25,7 @@ def scrape_set(html, url):
     except Exception as e:
         venue = None
 
-    # Scrape links
+    # Scrape next & previous setlist links
     try:
         previous_setlist = urljoin(
             url,
@@ -45,6 +45,15 @@ def scrape_set(html, url):
         )
     except Exception as e:
         next_setlist = None
+
+    # Scrape other links
+    artist_links = []
+    for link in soup.body.select(".aMenu .aMenuItem.collapse a.sideLink"):
+        artist_links.append(urljoin(url, link.get('href')))
+
+    related_links = []
+    for link in soup.body.select(".headBG + .aMenuItem .sideTLDiv a.sideLink"):
+        related_links.append(urljoin(url, link.get('href')))
 
     # Scrape Songs
     songs = []
@@ -98,6 +107,8 @@ def scrape_set(html, url):
         "songs": songs,
         "next_set": next_setlist,
         "previous_set": previous_setlist,
+        "artist_links": artist_links,
+        "related_links": related_links,
         "occasion": occasion,
         "venue": venue
     }

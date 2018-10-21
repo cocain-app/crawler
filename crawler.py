@@ -19,28 +19,51 @@ def crawl(autocrawl=False, sleeptime=5):
     driver = webdriver.Chrome()
     driver.implicitly_wait(30)
 
-    # Scrape tracks
+    # Load queue
     urls = []
-
     with open('queue.txt') as f:
         for line in f:
             urls.append(line.strip())
 
+    # Scrape tracks
     for url in urls:
         if(url == "" or url is None):
             continue
 
         print("Scraping %s:" % url)
-
         driver.get(url)
+
+        # Expand sidebar links
+        if(autocrawl):
+            for element in driver.find_elements_by_css_selector(
+                "a.list-group-item:first-of-type"
+            )[:2]:
+                driver.execute_script("arguments[0].click();", element)
+
+            time.sleep(2)
+
         html = driver.page_source
-
         setlist = scrape_set(html, url)
-        upload_set(conn, setlist)
+        # upload_set(conn, setlist)
 
-        if(autocrawl and setlist["previous_set"]):
-            urls.append(setlist["previous_set"])
-            print("Added setlist %s to queue." % setlist["previous_set"])
+        # Add links to queue
+        if(autocrawl):
+            if(setlist["previous_set"]):
+                urls.append(setlist["previous_set"])
+                print("Added previous setlist %s to queue."
+                      % setlist["previous_set"])
+
+            if(setlist["next_set"]):
+                urls.append(setlist["next_set"])
+                print("Added next setlist %s to queue." % setlist["next_set"])
+
+            for link in setlist["artist_links"]:
+                urls.append(link)
+                print("Added artist setlist %s to queue." % link)
+
+            for link in setlist["related_links"]:
+                urls.append(link)
+                print("Added related setlist %s to queue." % link)
 
         time.sleep(sleeptime)
 

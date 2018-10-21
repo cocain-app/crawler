@@ -24,6 +24,8 @@ def test_regular_scraping():
         'previous_set': 'https://www.1001tracklists.com/tracklist/2uj6gx0t/san-holo-rome-in-silver-bitbird-radio-022-2018-09-10.html',
         'occasion': None,
         'venue': None,
+        'artist_links': [],
+        'related_links': [],
         'songs': [
             {
                 'label': 'bitbird',
@@ -121,6 +123,23 @@ def test_id_scraping():
         'source': 'https://www.1001tracklists.com/tracklist/ltk7cx9/swacq-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html',
         'occasion': 'Amsterdam Dance Event',
         'venue': 'Q-Factory Amsterdam',
+        'artist_links': [
+            'https://www.1001tracklists.com/tracklist/ltk7cx9/swacq-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html',
+            'https://www.1001tracklists.com/tracklist/1ykwrmb1/swacq-revealed-radio-174-2018-07-06.html',
+            'https://www.1001tracklists.com/tracklist/jx645n1/tiesto-swacq-we-are-loud-club-life-567-2018-02-09.html'
+        ],
+        'related_links': [
+            'https://www.1001tracklists.com/tracklist/14ht0wsk/magnificence-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html',
+            'https://www.1001tracklists.com/tracklist/2vg3u17t/tom-and-jame-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html',
+            'https://www.1001tracklists.com/tracklist/tb4y0r1/kaaze-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html',
+            'https://www.1001tracklists.com/tracklist/1xng7m69/suyano-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html',
+            'https://www.1001tracklists.com/tracklist/ply7spk/manse-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html',
+            'https://www.1001tracklists.com/tracklist/229gmln1/sick-individuals-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html',
+            'https://www.1001tracklists.com/tracklist/29rw08lk/syzz-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html',
+            'https://www.1001tracklists.com/tracklist/g4jvdhk/reggio-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html',
+            'https://www.1001tracklists.com/tracklist/11qd0ru9/dannic-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html',
+            'https://www.1001tracklists.com/tracklist/194tffst/maddix-revealed-night-q-factory-amsterdam-amsterdam-dance-event-netherlands-2018-10-20.html'
+        ],
         'songs': [
             {
                 'artist': 'SWACQ',
