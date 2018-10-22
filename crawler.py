@@ -23,6 +23,7 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
 
     # Create Browser
     driver = create_browser(headless=headless)
+    driver.set_page_load_timeout(10)
 
     # Scrape tracks
     urls = queue

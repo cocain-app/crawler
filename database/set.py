@@ -9,10 +9,10 @@ def get_set_id(conn, source):
     return records[0]
 
 
-def create_set(conn, source, dj_id):
+def create_set(conn, source, dj_id, venue_id, occasion_id):
     cursor = conn.cursor()
-    SQL = "INSERT INTO Sets (dj_id, source) VALUES (%s, %s) RETURNING id;"
-    data = (dj_id, source, )
+    SQL = "INSERT INTO Sets (dj_id, source, occasion_id, venue_id) VALUES (%s, %s, %s, %s) RETURNING id;"
+    data = (dj_id, source, occasion_id, venue_id, )
     cursor.execute(SQL, data)
     id = cursor.fetchone()[0]
     conn.commit()

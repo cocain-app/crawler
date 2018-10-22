@@ -6,6 +6,8 @@ from .transition import create_transition
 from .set import get_set_id, create_set
 from .artist import get_artist_id, create_artist
 from .dj import get_dj_id, create_dj
+from .occasion import get_occasion_id, create_occasion
+from .venue import get_venue_id, create_venue
 
 
 def create_database_connection():
@@ -35,6 +37,7 @@ def create_database_connection():
 
     # Initialize
     initialize_database(conn)
+    print("Initialized database")
 
     return conn
 
@@ -55,9 +58,23 @@ def upload_set(conn, setlist):
     if dj_id is None:
         dj_id = create_dj(conn, dj_name)
 
+    if(setlist["venue"] is not None):
+        venue_id = get_venue_id(conn, setlist["venue"])
+        if venue_id is None:
+            venue_id = create_venue(conn, setlist["venue"])
+    else:
+        venue_id = None
+
+    if(setlist["occasion"] is not None):
+        occasion_id = get_occasion_id(conn, setlist["occasion"])
+        if occasion_id is None:
+            occasion_id = create_occasion(conn, setlist["occasion"])
+    else:
+        occasion_id = None
+
     set_id = get_set_id(conn, source)
     if set_id is None:
-        set_id = create_set(conn, source, dj_id)
+        set_id = create_set(conn, source, dj_id, venue_id, occasion_id)
 
         for index, song in enumerate(songs):
 
@@ -91,4 +108,4 @@ def upload_set(conn, setlist):
                 create_transition(conn, song_from_id, song_to_id, set_id)
 
     else:
-        print("Already scraped set from %s" % source)
+        print("Set from %s is already in the database" % source)

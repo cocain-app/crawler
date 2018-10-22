@@ -18,7 +18,13 @@ CREATE TABLE IF NOT EXISTS Djs (
     timestamp_added timestamp default current_timestamp,
     timestamp_modified timestamp
 );
-CREATE TRIGGER update_dj_timestamp_modified BEFORE UPDATE ON Djs FOR EACH ROW EXECUTE PROCEDURE update_timestamp_modified_column();
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_dj_timestamp_modified') THEN
+        CREATE TRIGGER update_dj_timestamp_modified BEFORE UPDATE ON Djs FOR EACH ROW EXECUTE PROCEDURE update_timestamp_modified_column();
+    END IF;
+END
+$$;
 
 CREATE TABLE IF NOT EXISTS Artists (
     id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -26,7 +32,13 @@ CREATE TABLE IF NOT EXISTS Artists (
     timestamp_added timestamp default current_timestamp,
     timestamp_modified timestamp
 );
-CREATE TRIGGER update_artists_timestamp_modified BEFORE UPDATE ON Artists FOR EACH ROW EXECUTE PROCEDURE update_timestamp_modified_column();
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_artists_timestamp_modified') THEN
+        CREATE TRIGGER update_artists_timestamp_modified BEFORE UPDATE ON Artists FOR EACH ROW EXECUTE PROCEDURE update_timestamp_modified_column();
+    END IF;
+END
+$$;
 
 CREATE TABLE IF NOT EXISTS Songs (
     id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -34,27 +46,52 @@ CREATE TABLE IF NOT EXISTS Songs (
     artist_id uuid NOT NULL,
     release_date date,
     duration int,
+    spotify_uri varchar(255),
     timestamp_added timestamp default current_timestamp,
     timestamp_modified timestamp,
     FOREIGN KEY (artist_id) REFERENCES Artists(id)
 );
-CREATE TRIGGER update_songs_timestamp_modified BEFORE UPDATE ON Songs FOR EACH ROW EXECUTE PROCEDURE update_timestamp_modified_column();
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_songs_timestamp_modified') THEN
+        CREATE TRIGGER update_songs_timestamp_modified BEFORE UPDATE ON Songs FOR EACH ROW EXECUTE PROCEDURE update_timestamp_modified_column();
+    END IF;
+END
+$$;
 
 CREATE TABLE IF NOT EXISTS Venues (
     id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name varchar(255) NOT NULL
+    name varchar(255) NOT NULL,
+    timestamp_added timestamp default current_timestamp,
+    timestamp_modified timestamp
 );
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_venues_timestamp_modified') THEN
+        CREATE TRIGGER update_venues_timestamp_modified BEFORE UPDATE ON Venues FOR EACH ROW EXECUTE PROCEDURE update_timestamp_modified_column();
+    END IF;
+END
+$$;
 
 CREATE TABLE IF NOT EXISTS Occasions (
     id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name varchar(255) NOT NULL
+    name varchar(255) NOT NULL,
+    timestamp_added timestamp default current_timestamp,
+    timestamp_modified timestamp
 );
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_occasions_timestamp_modified') THEN
+        CREATE TRIGGER update_occasions_timestamp_modified BEFORE UPDATE ON Occasions FOR EACH ROW EXECUTE PROCEDURE update_timestamp_modified_column();
+    END IF;
+END
+$$;
 
 CREATE TABLE IF NOT EXISTS Sets (
     id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
     dj_id uuid NOT NULL,
-    occasion_id uuid NOT NULL,
-    venue_id uuid NOT NULL,
+    occasion_id uuid,
+    venue_id uuid,
     recording_date date,
     source text,
     timestamp_added timestamp default current_timestamp,
@@ -63,7 +100,13 @@ CREATE TABLE IF NOT EXISTS Sets (
     FOREIGN KEY (occasion_id) REFERENCES Occasions(id),
     FOREIGN KEY (venue_id) REFERENCES Venues(id)
 );
-CREATE TRIGGER update_sets_timestamp_modified BEFORE UPDATE ON Sets FOR EACH ROW EXECUTE PROCEDURE update_timestamp_modified_column();
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_sets_timestamp_modified') THEN
+        CREATE TRIGGER update_sets_timestamp_modified BEFORE UPDATE ON Sets FOR EACH ROW EXECUTE PROCEDURE update_timestamp_modified_column();
+    END IF;
+END
+$$;
 
 CREATE TABLE IF NOT EXISTS Transitions (
     song_from uuid NOT NULL,
