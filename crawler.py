@@ -158,7 +158,7 @@ if __name__ == "__main__":
 
     if(args.max):
         if args.max > 0:
-            max = args.sleeptime
+            max = args.max
             print("Maximum number of sets is set to %s" % max)
         else:
             max = None
