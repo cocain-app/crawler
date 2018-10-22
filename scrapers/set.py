@@ -1,3 +1,4 @@
+import time
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
@@ -110,6 +111,7 @@ def scrape_set(html, url):
         "artist_links": artist_links,
         "related_links": related_links,
         "occasion": occasion,
-        "venue": venue
+        "venue": venue,
+        "timestamp": time.time()
     }
     return set

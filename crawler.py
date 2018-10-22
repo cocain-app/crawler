@@ -1,31 +1,31 @@
 import sys
 import time
+import json
 import argparse
 from selenium import webdriver
 
-from database import create_database_connection, upload_set
 from scrapers import scrape_set
 
 
-def crawl(autocrawl=False, sleeptime=5):
-    # Establish Database connection
-    try:
-        conn = create_database_connection()
-    except Exception as e:
-        print(e)
-        sys.exit()
+def crawl(autocrawl=False, sleeptime=5, nodb=False, queue=[]):
+
+    if not nodb:
+        # Additional imports
+        from database import create_database_connection, upload_set
+
+        # Establish Database connection
+        try:
+            conn = create_database_connection()
+        except Exception as e:
+            print(e)
+            sys.exit()
 
     # Create browser
     driver = webdriver.Chrome()
     driver.implicitly_wait(30)
 
-    # Load queue
-    urls = []
-    with open('queue.txt') as f:
-        for line in f:
-            urls.append(line.strip())
-
     # Scrape tracks
+    urls = queue
     urls_scraped = set()
     while(len(urls) > 0):
         num_current = len(urls_scraped) + 1
@@ -50,7 +50,21 @@ def crawl(autocrawl=False, sleeptime=5):
 
         html = driver.page_source
         setlist = scrape_set(html, url)
-        upload_set(conn, setlist)
+
+        # Save the scraped information
+        if not nodb:
+            upload_set(conn, setlist)
+        else:
+            try:
+                with open("output.json", "r+") as f:
+                    data = json.load(f)
+            except Exception as e:
+                data = []
+
+            data.append(setlist)
+
+            with open("output.json", "w+") as f:
+                f.write(json.dumps(data))
 
         # Add links to queue
         if(autocrawl):
@@ -98,8 +112,16 @@ if __name__ == "__main__":
     parser.add_argument("-a", "--autocrawl",
                         help="automatically add urls to queue",
                         action="store_true")
-
     parser.add_argument("-s", "--sleeptime", type=int)
+    parser.add_argument("--nodb",
+                        help="disable the database connection and scrape to a file instead",
+                        action="store_true")
+
+    source = parser.add_mutually_exclusive_group(required=True)
+    source.add_argument('--queuefile',
+                        help="path to a txt file with links (one per line)")
+    source.add_argument('--link',
+                        help="first link to start scraping")
 
     args = parser.parse_args()
 
@@ -119,5 +141,18 @@ if __name__ == "__main__":
     else:
         sleeptime = 5
 
+    if(args.nodb):
+        nodb = True
+    else:
+        nodb = False
+
+    queue = []
+    if(args.queuefile):
+        with open(args.queuefile) as f:
+            for line in f:
+                queue.append(line.strip())
+    elif(args.link):
+        queue.append(args.link)
+
     # Crawl
-    crawl(autocrawl=autocrawl, sleeptime=sleeptime)
+    crawl(autocrawl=autocrawl, sleeptime=sleeptime, nodb=nodb, queue=queue)
