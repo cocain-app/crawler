@@ -3,11 +3,12 @@ import time
 import json
 import argparse
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 
 from scrapers import scrape_set
 
 
-def crawl(autocrawl=False, sleeptime=5, nodb=False, queue=[]):
+def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False, headless=False, queue=[]):
 
     if not nodb:
         # Additional imports
@@ -21,7 +22,13 @@ def crawl(autocrawl=False, sleeptime=5, nodb=False, queue=[]):
             sys.exit()
 
     # Create browser
-    driver = webdriver.Chrome()
+    chrome_options = Options()
+    if(headless):
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+
+    driver = webdriver.Chrome(options=chrome_options)
     driver.implicitly_wait(30)
 
     # Scrape tracks
@@ -30,6 +37,11 @@ def crawl(autocrawl=False, sleeptime=5, nodb=False, queue=[]):
     while(len(urls) > 0):
         num_current = len(urls_scraped) + 1
         num_overall = str(len(urls) + len(urls_scraped)) + ("+" if autocrawl else "")
+
+        # Exit if enough sets are scraped is reached
+        if(max is not None and max < num_current):
+            break
+
         print("Scraping url %s of %s" % (num_current, num_overall))
 
         url = urls[0]
@@ -100,9 +112,8 @@ def crawl(autocrawl=False, sleeptime=5, nodb=False, queue=[]):
         time.sleep(sleeptime)
 
     # Clear queue.txt & close browsers
-    print("Scraped queue.txt")
+    print("Scraped %s sets" % num_current)
     driver.quit()
-    open("queue.txt", 'w').close()
 
 
 if __name__ == "__main__":
@@ -113,8 +124,12 @@ if __name__ == "__main__":
                         help="automatically add urls to queue",
                         action="store_true")
     parser.add_argument("-s", "--sleeptime", type=int)
+    parser.add_argument("--max", type=int)
     parser.add_argument("--nodb",
                         help="disable the database connection and scrape to a file instead",
+                        action="store_true")
+    parser.add_argument("--headless",
+                        help="run chrome in headless mode",
                         action="store_true")
 
     source = parser.add_mutually_exclusive_group(required=True)
@@ -141,10 +156,25 @@ if __name__ == "__main__":
     else:
         sleeptime = 5
 
+    if(args.max):
+        if args.max > 0:
+            max = args.sleeptime
+            print("Maximum number of sets is set to %s" % max)
+        else:
+            max = None
+            print("Maximum number of sets needs to be positive")
+    else:
+        max = None
+
     if(args.nodb):
         nodb = True
     else:
         nodb = False
+
+    if(args.headless):
+        headless = True
+    else:
+        headless = False
 
     queue = []
     if(args.queuefile):
@@ -155,4 +185,8 @@ if __name__ == "__main__":
         queue.append(args.link)
 
     # Crawl
-    crawl(autocrawl=autocrawl, sleeptime=sleeptime, nodb=nodb, queue=queue)
+    crawl(autocrawl=autocrawl, sleeptime=sleeptime, nodb=nodb, headless=headless, queue=queue, max=max)
+
+    # Clear queue
+    if args.queuefile:
+        open("queue.txt", 'w').close()
