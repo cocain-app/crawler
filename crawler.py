@@ -2,13 +2,13 @@ import sys
 import time
 import json
 import argparse
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
 
 from scrapers import scrape_set
+from functions.browser import create_browser, get_page_source
 
 
-def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False, headless=False, queue=[]):
+def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
+          headless=False, queue=[]):
 
     if not nodb:
         # Additional imports
@@ -21,19 +21,13 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False, headless=False, qu
             print(e)
             sys.exit()
 
-    # Create browser
-    chrome_options = Options()
-    if(headless):
-        chrome_options.add_argument("--headless")
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
-
-    driver = webdriver.Chrome(options=chrome_options)
-    driver.implicitly_wait(30)
+    # Create Browser
+    driver = create_browser(headless=headless)
 
     # Scrape tracks
     urls = queue
     urls_scraped = set()
+    error_count = 0
     while(len(urls) > 0):
         num_current = len(urls_scraped) + 1
         num_overall = str(len(urls) + len(urls_scraped)) + ("+" if autocrawl else "")
@@ -49,19 +43,32 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False, headless=False, qu
             continue
 
         print("Scraping %s:" % url)
-        driver.get(url)
 
-        # Expand sidebar links
-        if(autocrawl):
-            for element in driver.find_elements_by_css_selector(
-                "a.list-group-item:first-of-type"
-            )[:2]:
-                driver.execute_script("arguments[0].click();", element)
+        try:
+            html = get_page_source(driver, url, autocrawl=autocrawl)
+        except Exception as e:
+            if(error_count >= 3):
+                print("Couldn't recieve page source. Error %s, skipping" % e)
+                urls_scraped.add(urls.pop(0))
+                error_count = 0
+                continue
+            else:
+                print("Couldn't recieve page source retrying")
+                error_count += 1
+                continue
 
-            time.sleep(2)
-
-        html = driver.page_source
-        setlist = scrape_set(html, url)
+        try:
+            setlist = scrape_set(html, url)
+        except Exception as e:
+            if(error_count >= 3):
+                print("Couldn't scrape set because of %s, skipping" % e)
+                urls_scraped.add(urls.pop(0))
+                error_count = 0
+                continue
+            else:
+                print("Couldn't scrape set retrying")
+                error_count += 1
+                continue
 
         # Save the scraped information
         if not nodb:
@@ -135,8 +142,9 @@ if __name__ == "__main__":
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument('--queuefile',
                         help="path to a txt file with links (one per line)")
-    source.add_argument('--link',
-                        help="first link to start scraping")
+    source.add_argument('--queue',
+                        nargs='+',
+                        help="links to start scraping")
 
     args = parser.parse_args()
 
@@ -181,11 +189,12 @@ if __name__ == "__main__":
         with open(args.queuefile) as f:
             for line in f:
                 queue.append(line.strip())
-    elif(args.link):
-        queue.append(args.link)
+    elif(args.queue):
+        queue.extend(args.queue)
 
     # Crawl
-    crawl(autocrawl=autocrawl, sleeptime=sleeptime, nodb=nodb, headless=headless, queue=queue, max=max)
+    crawl(autocrawl=autocrawl, sleeptime=sleeptime, nodb=nodb,
+          headless=headless, queue=queue, max=max)
 
     # Clear queue
     if args.queuefile:
