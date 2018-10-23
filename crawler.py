@@ -46,6 +46,7 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
         if(url in blacklist):
             print("Url was found in the blacklist, skipping")
             urls_scraped.add(urls.pop(0))
+            continue
 
         print("Scraping %s:" % url)
 
