@@ -8,7 +8,7 @@ from functions.browser import create_browser, get_page_source
 
 
 def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
-          headless=False, queue=[]):
+          headless=False, queue=[], blacklist=set()):
 
     if not nodb:
         # Additional imports
@@ -42,6 +42,10 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
         url = urls[0]
         if(url == "" or url is None):
             continue
+
+        if(url in blacklist):
+            print("Url was found in the blacklist, skipping")
+            urls_scraped.add(urls.pop(0))
 
         print("Scraping %s:" % url)
 
@@ -140,6 +144,9 @@ if __name__ == "__main__":
                         help="run chrome in headless mode",
                         action="store_true")
 
+    parser.add_argument('--blacklistfile',
+                        help="path to a txt file with links (one per line)")
+
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument('--queuefile',
                         help="path to a txt file with links (one per line)")
@@ -193,9 +200,15 @@ if __name__ == "__main__":
     elif(args.queue):
         queue.extend(args.queue)
 
+    blacklist = set()
+    if(args.blacklistfile):
+        with open(args.blacklistfile) as f:
+            for line in f:
+                blacklist.add(line.strip())
+
     # Crawl
     crawl(autocrawl=autocrawl, sleeptime=sleeptime, nodb=nodb,
-          headless=headless, queue=queue, max=max)
+          headless=headless, queue=queue, max=max, blacklist=blacklist)
 
     # Clear queue
     if args.queuefile:

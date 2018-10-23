@@ -12,6 +12,9 @@ if __name__ == "__main__":
     parser.add_argument('--files',
                         nargs='+',
                         help="json files to import")
+    parser.add_argument('--onlyqueue',
+                        action="store_true",
+                        help="only export the queue file, don't upload the songs")
 
     args = parser.parse_args()
 
@@ -40,29 +43,30 @@ if __name__ == "__main__":
 
     queue = []
     for index, set in enumerate(clean_sets):
-        print("Uploading %s of %s - %s" % (index, len(clean_sets), set["set_title"]))
+        if not args.onlyqueue:
+            print("Uploading %s of %s - %s" % (index, len(clean_sets), set["set_title"]))
 
-        try:
-            upload_set(conn, set)
-        except Exception as e:
-            print("Could not upload set because of %s" % e)
-            cursor = conn.cursor()
-            cursor.execute("ROLLBACK")
-            conn.commit()
-            continue
+            try:
+                upload_set(conn, set)
+            except Exception as e:
+                print("Could not upload set because of %s" % e)
+                cursor = conn.cursor()
+                cursor.execute("ROLLBACK")
+                conn.commit()
+                continue
 
         # Load urls
         urls = []
-        if(setlist["previous_set"]):
-            urls.append(setlist["previous_set"])
+        if(set["previous_set"]):
+            urls.append(set["previous_set"])
 
         if(setlist["next_set"]):
-            urls.append(setlist["next_set"])
+            urls.append(set["next_set"])
 
-        for link in setlist["artist_links"]:
+        for link in set["artist_links"]:
             urls.append(link)
 
-        for link in setlist["related_links"]:
+        for link in set["related_links"]:
             urls.append(link)
 
         # Remove duplicates and already scraped ones
@@ -76,7 +80,7 @@ if __name__ == "__main__":
         if(len(clean_urls) > 0):
             print("Added %s links to queue" % len(clean_urls))
 
-        # Save queue
-        with open("queue.txt", "w") as f:
-            for url in queue:
-                f.write(str(url) + "\n")
+    # Save queue
+    with open("queue.txt", "w") as f:
+        for url in queue:
+            f.write(str(url) + "\n")

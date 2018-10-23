@@ -4,3 +4,6 @@ database.secret.env
 __pycache__/
 .pytest_cache/
 **.pyc
+queue.txt
+blacklist.txt
+output.json
