@@ -95,27 +95,27 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
         if(autocrawl):
             if(setlist["previous_set"]):
                 url = setlist["previous_set"]
-                if not (url in urls) and not (url in urls_scraped):
+                if not (url in urls) and not (url in urls_scraped) and not (url in blacklist):
                     urls.append(url)
                     print("Added previous setlist %s to queue."
                           % setlist["previous_set"])
 
             if(setlist["next_set"]):
                 url = setlist["next_set"]
-                if not (url in urls) and not (url in urls_scraped):
+                if not (url in urls) and not (url in urls_scraped) and not (url in blacklist):
                     urls.append(url)
                     print("Added next setlist %s to queue."
                           % setlist["next_set"])
 
             for link in setlist["artist_links"]:
                 url = link
-                if not (url in urls) and not (url in urls_scraped):
+                if not (url in urls) and not (url in urls_scraped) and not (url in blacklist):
                     urls.append(url)
                     print("Added artist setlist %s to queue." % link)
 
             for link in setlist["related_links"]:
                 url = link
-                if not (url in urls) and not (url in urls_scraped):
+                if not (url in urls) and not (url in urls_scraped) and not (url in blacklist):
                     urls.append(url)
                     print("Added related setlist %s to queue." % link)
 
