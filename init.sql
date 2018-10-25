@@ -93,7 +93,7 @@ CREATE TABLE IF NOT EXISTS Sets (
     occasion_id uuid,
     venue_id uuid,
     recording_date date,
-    source text,
+    source text UNIQUE,
     timestamp_added timestamp default current_timestamp,
     timestamp_modified timestamp,
     FOREIGN KEY (dj_id) REFERENCES Djs(id),
@@ -118,18 +118,70 @@ CREATE TABLE IF NOT EXISTS Transitions (
     CONSTRAINT Transitions_UQ UNIQUE(song_from, song_to, set_id)
 );
 
-CREATE TABLE IF NOT EXISTS Songs_BPM (
-    song_id uuid NOT NULL,
-    bpm int NOT NULL,
-    source text NOT NULL,
-    FOREIGN KEY (song_id) REFERENCES Songs(id),
-    CONSTRAINT Songs_BPM_UQ UNIQUE(song_id, bpm, source)
+CREATE TABLE IF NOT EXISTS Tags (
+    id uuid NOT NULL PRIMARY KEY DEFAULT uuid_generate_v4(),
+    name varchar(255) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS Songs_KEY (
-    song_id uuid NOT NULL,
-    key varchar(3) NOT NULL,
-    source text NOT NULL,
+CREATE TABLE IF NOT EXISTS Song_Tags (
+    song_id uuid,
+    tag_id uuid,
+    source text,
     FOREIGN KEY (song_id) REFERENCES Songs(id),
-    CONSTRAINT Songs_KEY_UQ UNIQUE(song_id, key, source)
+    FOREIGN KEY (tag_id) REFERENCES Tags(id),
+    CONSTRAINT Song_Tags_UQ UNIQUE(song_id, tag_id, source)
 );
+
+CREATE TABLE IF NOT EXISTS Artist_Tags (
+    artist_id uuid,
+    tag_id uuid,
+    source text,
+    FOREIGN KEY (artist_id) REFERENCES Artists(id),
+    FOREIGN KEY (tag_id) REFERENCES Tags(id),
+    CONSTRAINT Artist_Id_UQ UNIQUE(artist_id, tag_id, source)
+);
+
+CREATE TABLE IF NOT EXISTS Spotify_Songs (
+    spotify_uri varchar(255) PRIMARY KEY,
+    song_id uuid NOT NULL UNIQUE,
+    acousticness float,
+    danceability float,
+    duration_ms int,
+    energy float,
+    instrumentalness float,
+    key int,
+    mode int,
+    liveness float,
+    loudness float,
+    speechiness float,
+    tempo float,
+    time_signature int,
+    valence float,
+    timestamp_added timestamp default current_timestamp,
+    timestamp_modified timestamp,
+    FOREIGN KEY (song_id) REFERENCES Songs(id)
+);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_spotify_songs_timestamp_modified') THEN
+        CREATE TRIGGER update_spotify_songs_timestamp_modified BEFORE UPDATE ON Spotify_Songs FOR EACH ROW EXECUTE PROCEDURE update_timestamp_modified_column();
+    END IF;
+END
+$$;
+
+CREATE TABLE IF NOT EXISTS Spotify_Artists (
+    spotify_uri varchar(255) PRIMARY KEY,
+    artist_id uuid NOT NULL,
+    followers int,
+    popularity int,
+    timestamp_added timestamp default current_timestamp,
+    timestamp_modified timestamp,
+    FOREIGN KEY (artist_id) REFERENCES Artists(id)
+);
+DO $$
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'update_spotify_artists_timestamp_modified') THEN
+        CREATE TRIGGER update_spotify_artists_timestamp_modified BEFORE UPDATE ON Spotify_Artists FOR EACH ROW EXECUTE PROCEDURE update_timestamp_modified_column();
+    END IF;
+END
+$$;

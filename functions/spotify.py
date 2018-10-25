@@ -35,18 +35,11 @@ def fetch_song_general(song_name, artist_name):
         raise Exception("No song matching that query")
 
 
-def fetch_bpms(array):
+def fetch_spotify_audio_features(array):
     client_credentials_manager = SpotifyClientCredentials()
     spotify = spotipy.Spotify(
         client_credentials_manager=client_credentials_manager)
 
     audio_features = spotify.audio_features(array)
 
-    bpms = []
-    for song in audio_features:
-        if("tempo" in song):
-            bpms.append(song["tempo"])
-        else:
-            bpms.append(None)
-
-    return bpms
+    return audio_features

@@ -29,13 +29,3 @@ def set_song_spotify_uri(conn, song_id, uri):
     conn.commit()
 
     print("Updated song spotify_uri: %s %s" % (song_id, uri))
-
-
-def set_song_spotify_bpm(conn, song_id, bpm):
-    cursor = conn.cursor()
-    SQL = "INSERT INTO Songs_bpm (song_id, bpm, source) VALUES (%s, %s, %s);"
-    data = (song_id, bpm, "spotify", )
-    cursor.execute(SQL, data)
-    conn.commit()
-
-    print("Added song bpm: %s %s" % (song_id, bpm))
