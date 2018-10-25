@@ -40,6 +40,8 @@ def set_spotify_song_features(conn, song_id, audio_features):
         cursor.execute(SQL, data)
         conn.commit()
     except Exception as e:
+        cursor.execute("ROLLBACK")
+        conn.commit()
         print("Couldn't add song. %s" % e)
 
     print("Added spotify song: %s %s" % (song_id, uri))
