@@ -41,8 +41,9 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
         if(num_current % 10 == 0):
             if(proxy_index > len(proxies)):
                 proxy_index = 0
-            driver = create_browser(
-                headless=headless, proxy=proxies[proxy_index], timeout=timeout)
+                driver = create_browser(headless=headless,
+                                        proxy=proxies[proxy_index],
+                                        timeout=timeout)
 
         # Exit if enough sets are scraped is reached
         if(max is not None and max < num_current):
