@@ -19,3 +19,13 @@ def create_song(conn, song_title, artist_id, duration):
 
     print("Added song: %s" % song_title)
     return id
+
+
+def set_song_spotify_uri(conn, song_id, uri):
+    cursor = conn.cursor()
+    SQL = "UPDATE Songs SET spotify_uri = %s WHERE songs.id = %s;"
+    data = (uri, song_id, )
+    cursor.execute(SQL, data)
+    conn.commit()
+
+    print("Updated song spotify_uri: %s %s" % (song_id, uri))

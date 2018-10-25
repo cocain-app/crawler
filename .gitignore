@@ -7,3 +7,4 @@ __pycache__/
 queue.txt
 blacklist.txt
 output.json
+proxy.txt

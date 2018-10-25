@@ -13,4 +13,5 @@ pytest==3.9.1
 requests==2.19.1
 selenium==3.14.1
 six==1.11.0
+spotipy==2.4.4
 urllib3==1.23
