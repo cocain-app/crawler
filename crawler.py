@@ -8,7 +8,7 @@ from functions.browser import create_browser, get_page_source
 
 
 def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
-          headless=False, queue=[], blacklist=set()):
+          headless=False, queue=[], blacklist=set(), proxies=[], timeout=3):
 
     if not nodb:
         # Additional imports
@@ -22,16 +22,27 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
             sys.exit()
 
     # Create Browser
-    driver = create_browser(headless=headless)
-    driver.set_page_load_timeout(10)
+    if(len(proxies) > 0):
+        driver = create_browser(headless=headless,
+                                proxy=proxies[0], timeout=timeout)
+    else:
+        driver = create_browser(headless=headless, timeout=timeout)
 
     # Scrape tracks
     urls = queue
     urls_scraped = set()
     error_count = 0
+    proxy_index = 1
     while(len(urls) > 0):
         num_current = len(urls_scraped) + 1
         num_overall = str(len(urls) + len(urls_scraped)) + ("+" if autocrawl else "")
+
+        # Set proxy
+        if(num_current % 10 == 0):
+            if(proxy_index > len(proxies)):
+                proxy_index = 0
+            driver = create_browser(
+                headless=headless, proxy=proxies[proxy_index], timeout=timeout)
 
         # Exit if enough sets are scraped is reached
         if(max is not None and max < num_current):
@@ -137,6 +148,7 @@ if __name__ == "__main__":
                         help="automatically add urls to queue",
                         action="store_true")
     parser.add_argument("-s", "--sleeptime", type=int)
+    parser.add_argument("-t", "--timeout", type=int)
     parser.add_argument("--max", type=int)
     parser.add_argument("--nodb",
                         help="disable the database connection and scrape to a file instead",
@@ -144,9 +156,10 @@ if __name__ == "__main__":
     parser.add_argument("--headless",
                         help="run chrome in headless mode",
                         action="store_true")
-
     parser.add_argument('--blacklistfile',
                         help="path to a txt file with links (one per line)")
+    parser.add_argument('--proxyfile',
+                        help="path to a txt file with proxies (one per line)")
 
     source = parser.add_mutually_exclusive_group(required=True)
     source.add_argument('--queuefile',
@@ -183,6 +196,16 @@ if __name__ == "__main__":
     else:
         max = None
 
+    if(args.timeout):
+        if(args.timeout > 3):
+            timeout = args.timeout
+            print("Timeout is set to %s" % timeout)
+        else:
+            timeout = 3
+            print("Timeout needs to be a minimum of 3 seconds")
+    else:
+        timeout = 10
+
     if(args.nodb):
         nodb = True
     else:
@@ -207,9 +230,16 @@ if __name__ == "__main__":
             for line in f:
                 blacklist.add(line.strip())
 
+    proxies = []
+    if(args.proxyfile):
+        with open(args.proxyfile) as f:
+            for line in f:
+                proxies.append(line.strip())
+
     # Crawl
     crawl(autocrawl=autocrawl, sleeptime=sleeptime, nodb=nodb,
-          headless=headless, queue=queue, max=max, blacklist=blacklist)
+          headless=headless, queue=queue, max=max, blacklist=blacklist,
+          proxies=proxies, timeout=timeout)
 
     # Clear queue
     if args.queuefile:
