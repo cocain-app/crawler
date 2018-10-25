@@ -46,7 +46,6 @@ CREATE TABLE IF NOT EXISTS Songs (
     artist_id uuid NOT NULL,
     release_date date,
     duration int,
-    spotify_uri varchar(255),
     timestamp_added timestamp default current_timestamp,
     timestamp_modified timestamp,
     FOREIGN KEY (artist_id) REFERENCES Artists(id)
