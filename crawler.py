@@ -36,6 +36,7 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
         # Create Browser
         if(len(proxies) > 0):
             if(num_current % 10 == 0 or driver is None):
+                proxy_index += 1
                 if(driver is not None):
                     driver.quit()
 
@@ -48,7 +49,7 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
                                             proxy=proxies[proxy_index],
                                             timeout=timeout)
                 except BadProxyException as e:
-                    del proxies[proxy_index]
+                    proxies.remove(proxies[proxy_index])
                     continue
         else:
             driver = create_browser(headless=headless, timeout=timeout)
