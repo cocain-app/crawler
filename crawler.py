@@ -9,7 +9,8 @@ from functions.browser import (
 
 
 def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
-          headless=False, queue=[], blacklist=set(), proxies=[], timeout=3):
+          headless=False, queue=[], blacklist=set(),
+          proxies=[], timeout=3):
 
     if not nodb:
         # Additional imports
@@ -22,42 +23,35 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
             print(e)
             sys.exit()
 
-    # Create Browser
-    if(len(proxies) > 0):
-        # Wait for a config with a working Proxy
-        while(True):
-            try:
-                driver = create_browser(headless=headless,
-                                        proxy=proxies[0], timeout=timeout)
-                break
-            except BadProxyException as e:
-                del proxies[0]
-    else:
-        driver = create_browser(headless=headless, timeout=timeout)
-
     # Scrape tracks
+    driver = None
     urls = queue
     urls_scraped = set()
     error_count = 0
-    proxy_index = 1
+    proxy_index = 0
     while(len(urls) > 0):
         num_current = len(urls_scraped) + 1
         num_overall = str(len(urls) + len(urls_scraped)) + ("+" if autocrawl else "")
 
-        # Set proxy
-        if(len(proxies) > 0 and num_current % 10 == 0):
-            if(proxy_index > len(proxies)):
-                proxy_index = 0
-            driver.quit()
+        # Create Browser
+        if(len(proxies) > 0):
+            if(num_current % 10 == 0 or driver is None):
+                if(driver is not None):
+                    driver.quit()
 
-            # Wait for a config with a working Proxy
-            try:
-                driver = create_browser(headless=headless,
-                                        proxy=proxies[proxy_index],
-                                        timeout=timeout)
-            except BadProxyException as e:
-                del proxies[proxy_index]
-                continue
+                if(proxy_index > len(proxies)):
+                    proxy_index = 0
+
+                # Wait for a config with a working Proxy
+                try:
+                    driver = create_browser(headless=headless,
+                                            proxy=proxies[proxy_index],
+                                            timeout=timeout)
+                except BadProxyException as e:
+                    del proxies[proxy_index]
+                    continue
+        else:
+            driver = create_browser(headless=headless, timeout=timeout)
 
         # Exit if enough sets are scraped is reached
         if(max is not None and max < num_current):

@@ -1,7 +1,6 @@
 import time
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import NoSuchElementException
 
 
 class BadProxyException(Exception):
@@ -9,22 +8,19 @@ class BadProxyException(Exception):
 
 
 def test_proxy(driver, proxy):
-    driver.get("https://www.whatismyip.com/my-ip-information/")
-
     try:
-        ip_add = driver.find_element_by_id("ip-version-check").text
-        ip_add = ip_add.replace("Your IPv4 is: ", "")
-        print(ip_add)
+        driver.get("https://www.whatismyip.com/my-ip-information/")
+        title = driver.title
 
-        if(ip_add == proxy.split(":")[0]):
+        if(title == "My IP Information - WhatIsMyIP.com®"):
             return True
         else:
             return False
-    except NoSuchElementException as e:
+    except Exception as e:
         return False
 
 
-def create_browser(headless=False, proxy=None, timeout=10):
+def create_browser(headless=False, proxy=None, timeout=10, ublockpath=None):
     chrome_options = Options()
     if(headless):
         chrome_options.add_argument("--headless")
