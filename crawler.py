@@ -48,7 +48,6 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
         if(len(proxies) > 0 and num_current % 10 == 0):
             if(proxy_index > len(proxies)):
                 proxy_index = 0
-<<<<<<< HEAD
             driver.quit()
 
             # Wait for a config with a working Proxy
@@ -59,11 +58,6 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
             except BadProxyException as e:
                 del proxies[proxy_index]
                 continue
-=======
-                driver = create_browser(headless=headless,
-                                        proxy=proxies[proxy_index],
-                                        timeout=timeout)
->>>>>>> 5e00ef8caf4af7ca006ed2172feed04c172d5865
 
         # Exit if enough sets are scraped is reached
         if(max is not None and max < num_current):
