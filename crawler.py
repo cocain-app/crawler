@@ -4,7 +4,8 @@ import json
 import argparse
 
 from scrapers import scrape_set
-from functions.browser import create_browser, get_page_source
+from functions.browser import (
+    create_browser, get_page_source, BadProxyException)
 
 
 def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
@@ -23,8 +24,14 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
 
     # Create Browser
     if(len(proxies) > 0):
-        driver = create_browser(headless=headless,
-                                proxy=proxies[0], timeout=timeout)
+        # Wait for a config with a working Proxy
+        while(True):
+            try:
+                driver = create_browser(headless=headless,
+                                        proxy=proxies[0], timeout=timeout)
+                break
+            except BadProxyException as e:
+                del proxies[0]
     else:
         driver = create_browser(headless=headless, timeout=timeout)
 
@@ -38,11 +45,19 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
         num_overall = str(len(urls) + len(urls_scraped)) + ("+" if autocrawl else "")
 
         # Set proxy
-        if(num_current % 10 == 0):
+        if(len(proxies) > 0 and num_current % 10 == 0):
             if(proxy_index > len(proxies)):
                 proxy_index = 0
-            driver = create_browser(
-                headless=headless, proxy=proxies[proxy_index], timeout=timeout)
+            driver.quit()
+
+            # Wait for a config with a working Proxy
+            try:
+                driver = create_browser(headless=headless,
+                                        proxy=proxies[proxy_index],
+                                        timeout=timeout)
+            except BadProxyException as e:
+                del proxies[proxy_index]
+                continue
 
         # Exit if enough sets are scraped is reached
         if(max is not None and max < num_current):
