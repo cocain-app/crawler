@@ -1,4 +1,4 @@
-def set_spotify_song_features(conn, song_id, audio_features):
+def set_spotify_song_features(conn, uri, audio_features):
     cursor = conn.cursor()
 
     acousticness = audio_features["acousticness"]
@@ -15,12 +15,8 @@ def set_spotify_song_features(conn, song_id, audio_features):
     time_signature = audio_features["time_signature"]
     valence = audio_features["valence"]
 
-    uri = audio_features["uri"]
-
-    SQL = "INSERT INTO Spotify_Songs (spotify_uri, song_id, acousticness, danceability, duration_ms, energy, instrumentalness, key, liveness, loudness, mode, speechiness, tempo, time_signature, valence) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s );"
+    SQL = "UPDATE Spotify_Songs SET acousticness = %s, danceability = %s, duration_ms = %s, energy = %s, instrumentalness = %s, key = %s, liveness = %s, loudness = %s, mode = %s, speechiness = %s, tempo = %s, time_signature = %s, valence = %s WHERE spotify_uri = %s"
     data = (
-        uri,
-        song_id,
         acousticness,
         danceability,
         duration_ms,
@@ -33,7 +29,8 @@ def set_spotify_song_features(conn, song_id, audio_features):
         speechiness,
         tempo,
         time_signature,
-        valence
+        valence,
+        uri
     )
 
     try:
@@ -44,4 +41,4 @@ def set_spotify_song_features(conn, song_id, audio_features):
         conn.commit()
         print("Couldn't add song. %s" % e)
 
-    print("Added spotify song: %s %s" % (song_id, uri))
+    print("Updated info of Spotify song %s" % uri)
