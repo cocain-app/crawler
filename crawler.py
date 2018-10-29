@@ -3,14 +3,14 @@ import time
 import json
 import argparse
 
-from scrapers import scrape_set
-from functions.browser import (
-    create_browser, get_page_source, BadProxyException)
+from functions.browser import (create_browser, BadProxyException)
+
+from scrapers import get_mixcloud_set_source
 
 
 def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
           headless=False, queue=[], blacklist=set(),
-          proxies=[], timeout=3):
+          proxies=[], timeout=10):
 
     if not nodb:
         # Additional imports
@@ -71,74 +71,75 @@ def crawl(autocrawl=False, sleeptime=5, max=None, nodb=False,
 
         print("Scraping %s:" % url)
 
-        try:
-            html = get_page_source(driver, url, autocrawl=autocrawl)
-        except Exception as e:
-            if(error_count >= 3):
-                print("Couldn't recieve page source. Error %s, skipping" % e)
-                urls_scraped.add(urls.pop(0))
-                error_count = 0
-                continue
-            else:
-                print("Couldn't recieve page source retrying")
-                error_count += 1
-                continue
-
-        try:
-            setlist = scrape_set(html, url)
-        except Exception as e:
-            if(error_count >= 3):
-                print("Couldn't scrape set because of %s, skipping" % e)
-                urls_scraped.add(urls.pop(0))
-                error_count = 0
-                continue
-            else:
-                print("Couldn't scrape set retrying")
-                error_count += 1
-                continue
-
-        # Save the scraped information
-        if not nodb:
-            upload_set(conn, setlist)
-        else:
-            try:
-                with open("output.json", "r+") as f:
-                    data = json.load(f)
-            except Exception as e:
-                data = []
-
-            data.append(setlist)
-
-            with open("output.json", "w+") as f:
-                f.write(json.dumps(data))
-
-        # Add links to queue
-        if(autocrawl):
-            if(setlist["previous_set"]):
-                url = setlist["previous_set"]
-                if not (url in urls) and not (url in urls_scraped) and not (url in blacklist):
-                    urls.append(url)
-                    print("Added previous setlist %s to queue."
-                          % setlist["previous_set"])
-
-            if(setlist["next_set"]):
-                url = setlist["next_set"]
-                if not (url in urls) and not (url in urls_scraped) and not (url in blacklist):
-                    urls.append(url)
-                    print("Added next setlist %s to queue."
-                          % setlist["next_set"])
-
-            for link in setlist["artist_links"]:
-                url = link
-                if not (url in urls) and not (url in urls_scraped) and not (url in blacklist):
-                    urls.append(url)
-                    print("Added artist setlist %s to queue." % link)
-
-            for link in setlist["related_links"]:
-                url = link
-                if not (url in urls) and not (url in urls_scraped) and not (url in blacklist):
-                    urls.append(url)
-                    print("Added related setlist %s to queue." % link)
+        get_mixcloud_set_source(driver, url, autocrawl=autocrawl)
+        # try:
+        #     html = get_page_source(driver, url, autocrawl=autocrawl)
+        # except Exception as e:
+        #     if(error_count >= 3):
+        #         print("Couldn't recieve page source. Error %s, skipping" % e)
+        #         urls_scraped.add(urls.pop(0))
+        #         error_count = 0
+        #         continue
+        #     else:
+        #         print("Couldn't recieve page source retrying")
+        #         error_count += 1
+        #         continue
+        #
+        # try:
+        #     setlist = scrape_set(html, url)
+        # except Exception as e:
+        #     if(error_count >= 3):
+        #         print("Couldn't scrape set because of %s, skipping" % e)
+        #         urls_scraped.add(urls.pop(0))
+        #         error_count = 0
+        #         continue
+        #     else:
+        #         print("Couldn't scrape set retrying")
+        #         error_count += 1
+        #         continue
+        #
+        # # Save the scraped information
+        # if not nodb:
+        #     upload_set(conn, setlist)
+        # else:
+        #     try:
+        #         with open("output.json", "r+") as f:
+        #             data = json.load(f)
+        #     except Exception as e:
+        #         data = []
+        #
+        #     data.append(setlist)
+        #
+        #     with open("output.json", "w+") as f:
+        #         f.write(json.dumps(data))
+        #
+        # # Add links to queue
+        # if(autocrawl):
+        #     if(setlist["previous_set"]):
+        #         url = setlist["previous_set"]
+        #         if not (url in urls) and not (url in urls_scraped) and not (url in blacklist):
+        #             urls.append(url)
+        #             print("Added previous setlist %s to queue."
+        #                   % setlist["previous_set"])
+        #
+        #     if(setlist["next_set"]):
+        #         url = setlist["next_set"]
+        #         if not (url in urls) and not (url in urls_scraped) and not (url in blacklist):
+        #             urls.append(url)
+        #             print("Added next setlist %s to queue."
+        #                   % setlist["next_set"])
+        #
+        #     for link in setlist["artist_links"]:
+        #         url = link
+        #         if not (url in urls) and not (url in urls_scraped) and not (url in blacklist):
+        #             urls.append(url)
+        #             print("Added artist setlist %s to queue." % link)
+        #
+        #     for link in setlist["related_links"]:
+        #         url = link
+        #         if not (url in urls) and not (url in urls_scraped) and not (url in blacklist):
+        #             urls.append(url)
+        #             print("Added related setlist %s to queue." % link)
 
         # Move url to already scraped
         urls_scraped.add(urls.pop(0))

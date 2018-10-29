@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
 
-def scrape_set(html, url):
+def scrape_tracklist_set(html, url):
     soup = BeautifulSoup(html, "html.parser")
 
     # Scrape meta info
