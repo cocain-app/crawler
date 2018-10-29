@@ -7,7 +7,8 @@ def fetch_song_general(song_name, artist_name):
     spotify = spotipy.Spotify(
         client_credentials_manager=client_credentials_manager)
 
-    query = "%s %s" % (song_name, artist_name)
+    query_artist = artist_name.split("&")[0].strip()
+    query = "%s %s" % (song_name, query_artist)
 
     result = spotify.search(q=query, limit=20)
 
@@ -32,7 +33,7 @@ def fetch_song_general(song_name, artist_name):
 
         return metadata
     else:
-        raise Exception("No song matching that query")
+        raise Exception("No match found for %s by %s" % (song_name, artist_name))
 
 
 def fetch_spotify_audio_features(array):
