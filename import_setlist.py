@@ -15,15 +15,25 @@ if __name__ == "__main__":
     parser.add_argument('--onlyqueue',
                         action="store_true",
                         help="only export the queue file, don't upload the songs")
+    parser.add_argument('--blacklistfile',
+                        help="path to a txt file with links (one per line)")
 
     args = parser.parse_args()
 
+    # Build Blacklist
+    blacklist = set()
+    if(args.blacklistfile):
+        with open(args.blacklistfile) as f:
+            for line in f:
+                blacklist.add(line.strip())
+
     # Establish Database connection
-    try:
-        conn = create_database_connection()
-    except Exception as e:
-        print(e)
-        sys.exit()
+    if not args.onlyqueue:
+        try:
+            conn = create_database_connection()
+        except Exception as e:
+            print(e)
+            sys.exit()
 
     # Load setlists
     setlists = []
@@ -72,7 +82,7 @@ if __name__ == "__main__":
         # Remove duplicates and already scraped ones
         clean_urls = []
         for url in urls:
-            if(url not in clean_set_sources and url not in clean_urls):
+            if(url not in clean_set_sources and url not in clean_urls and url not in blacklist):
                 clean_urls.append(url)
 
         # Add urls to queue
