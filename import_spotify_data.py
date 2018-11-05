@@ -30,7 +30,11 @@ if __name__ == "__main__":
 
             for index, audio_features in enumerate(audio_features):
                 uri = uris[chunk_index * 50 + index]
-                set_spotify_song_features(conn, uri, audio_features)
+
+                try:
+                    set_spotify_song_features(conn, uri, audio_features)
+                except Exception as e:
+                    print("Could not save song because of %s" % e)
 
             time.sleep(2)
     else:
