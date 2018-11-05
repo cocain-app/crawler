@@ -22,6 +22,9 @@ def fetch_song_general(song_name, artist_name):
             "song_name": song["name"],
             "artists": song["artists"],
             "uri": song["uri"],
+            "preview_url": song["preview_url"],
+            "image_url_large": song["album"]["images"][0]["url"],
+            "image_url_small": song["album"]["images"][2]["url"]
         }
 
         artist_names = []

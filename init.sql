@@ -156,6 +156,9 @@ CREATE TABLE IF NOT EXISTS Spotify_Songs (
     tempo float,
     time_signature int,
     valence float,
+    preview_url varchar,
+    image_url_large varchar,
+    image_url_small varchar,
     timestamp_added timestamp default current_timestamp,
     timestamp_modified timestamp,
     FOREIGN KEY (song_id) REFERENCES Songs(id)

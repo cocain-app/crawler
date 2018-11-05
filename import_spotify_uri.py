@@ -15,7 +15,7 @@ if __name__ == "__main__":
     for song in records:
         try:
             metatdata = fetch_song_general(song[1], song[2])
-            create_spotify_song(conn, song[0], metatdata["uri"])
+            create_spotify_song(conn, song[0], metatdata)
         except Exception as e:
             cursor = conn.cursor()
             cursor.execute("ROLLBACK")
